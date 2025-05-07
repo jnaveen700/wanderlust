@@ -52,7 +52,7 @@ app.get("/",(req, res)=>{
     app.post("/listings",async (req, res)=>{
         const newListing = new Listing(req.body.listing);
         await newListing.save();
-        res.redirect("listings");
+        res.redirect("/listings");
     });
     //Edit route
     app.get("/listings/:id/edit", async (req, res)=> {
@@ -72,14 +72,3 @@ app.get("/",(req, res)=>{
         console.log(deletedListing);
         res.redirect("/listings");        
     });
-// app.get("/testlisting",async (req, res)=> {
-//     let samplelisting = new Listing({
-//         title: "my new villa",
-//         description: "by the beach",
-//         location: "calangute,Goa",
-//         country:"India",
-//     });
-//     await samplelisting.save();
-//     console.log("sample was saved");
-//     res.send("successful testing");    
-// });
