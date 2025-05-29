@@ -58,6 +58,9 @@ app.get("/",(req, res)=>{
     }));
     //Edit route
     app.get("/listings/:id/edit", wrapAsync( async (req, res)=> {
+        if(!req.body.listings){
+            throw new ExpressError(400,"Send valid data for listing");
+        }
         let {id} = req.params;
         const listing = await Listing.findById(id);
         res.render("listing/edit.ejs",{listing});
@@ -81,7 +84,8 @@ app.get("/",(req, res)=>{
 
     app.use((err,req,res,next) =>{
         let {statusCode=500,message="There was an error on our side"}= err;
-        res.status(statusCode).send(message);
+        //res.status(statusCode).send(message);
+        res.status(statusCode).render("error.ejs", {message} );
     });
 
 
