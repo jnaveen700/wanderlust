@@ -143,3 +143,13 @@ a:hover {
 .show-img {
     height: 30vh !important;
 }
+
+.btns {
+    display:flex;
+}
+
+.show-card 
+{
+ padding-left : 0;
+ padding-right : 0;   
+}
