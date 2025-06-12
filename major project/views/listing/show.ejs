@@ -3,37 +3,37 @@
 <div class="container mt-4" style="max-width: 700px;">
   <div class="row mb-3">
     <div class="col">
-      <h3><%= listing.description %></h3>
+      <h3><%= listing.title %></h3>
     </div>
   </div>
-  
-  <div class="card">
-    <img 
-      class="card-img-top" 
-      src="<%= listing.image.url %>" 
-      alt="listing_image"
-      style="object-fit: cover;"
-    />
-    
-    <div class="card-body">
-      <h5 class="card-title"><%= listing.title %></h5>
-      <p class="card-text mb-1">
-        <%= listing.description %>
-      </p>
-      <p class="card-text mb-1">
-        &#8377; <%= listing.price.toLocaleString("en-IN") %>
-      </p>
-      <p class="card-text mb-1">
-        <%= listing.location %>
-      </p>
-      <p class="card-text">
-        <%= listing.country %>
-      </p>
 
-      <div>
+  <div class="container d-flex justify-content-center" style="max-width: 500px;">
+    <div class="card" style="width: 100%; height: auto; overflow: hidden;">
+      <img 
+        class="card-img-top" 
+        src="<%= listing.image.url %>" 
+        alt="listing_image"
+        style="object-fit: cover; width: 100%; height: 300px;"
+      />
+      <div class="card-body">
+        <p class="card-text mb-1">
+          <strong>Description:</strong> <%= listing.description %>
+        </p>
+        <p class="card-text mb-1">
+          <strong>Price:</strong> &#8377; <%= listing.price.toLocaleString("en-IN") %>
+        </p>
+        <p class="card-text mb-1">
+          <strong>Location:</strong> <%= listing.location %>
+        </p>
+        <p class="card-text">
+          <strong>Country:</strong> <%= listing.country %>
+        </p>
+      </div>
+
+      <div class="card-footer d-flex justify-content-between">
         <a 
           href="/listings/<%= listing._id %>/edit" 
-          class="btn btn-danger me-2"
+          class="btn btn-danger"
         >
           Edit
         </a>
