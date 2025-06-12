@@ -8,7 +8,8 @@ const listing = require("./models/listing.js");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
-const ExpressError = require("./utils/ExpressError.js")
+const ExpressError = require("./utils/ExpressError.js");
+const {listingSchema} = require("./schema.js");
 
 
 main().then(() => {
@@ -37,6 +38,17 @@ app.get("/",(req, res)=>{
      const allListings = await Listing.find({});
     res.render("listing/index", {allListings});
     });
+
+    const validatelisting = (req,res,next) => { 
+        let error = listingSchema.validate(req.body);
+        if(error){
+            let errmsg = error.deatils.map((el)=> el.message).join(",");
+            throw new ExpressError(400,errmsg);
+        }else{
+            next();
+        }
+
+    };
     //newroute
     app.get("/listings/new", (req, res)=>{
         res.render("listing/new");
@@ -49,9 +61,6 @@ app.get("/",(req, res)=>{
     }));
     //create route 
     app.post("/listings",wrapAsync( async (req, res)=>{
-        if(!req.body.listings){
-            throw new ExpressError(400,"Send valid data for listing");
-        }
             const newListing = new Listing(req.body.listing);
             await newListing.save();
             res.redirect("/listings");
