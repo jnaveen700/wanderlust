@@ -1,0 +1,69 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-4" style="max-width: 700px;">
+  <div class="row mb-3">
+    <div class="col">
+      <h3><%= listing.title %></h3>
+    </div>
+  </div>
+
+  <div class="container d-flex justify-content-center" style="max-width: 500px;">
+    <div class="card" style="width: 100%; height: auto; overflow: hidden;">
+      <img 
+        class="card-img-top" 
+        src="<%= listing.image.url %>" 
+        alt="listing_image"
+        style="object-fit: cover; width: 100%; height: 300px;"
+      />
+      <div class="card-body">
+        <p class="card-text mb-1"><strong>Description:</strong> <%= listing.description %></p>
+        <p class="card-text mb-1"><strong>Price:</strong> ₹ <%= listing.price.toLocaleString("en-IN") %></p>
+        <p class="card-text mb-1"><strong>Location:</strong> <%= listing.location %></p>
+        <p class="card-text"><strong>Country:</strong> <%= listing.country %></p>
+
+        <div class="d-flex gap-2 mt-3">
+          <a href="/listings/<%= listing._id %>/edit" class="btn btn-danger">Edit</a>
+          <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display: inline;">
+            <button class="btn btn-dark">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-8 offset-3 mb-3 mt-3">
+    <h4>Review</h4>
+    <hr>
+    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+      <div class="mb-3 mt-3">
+        <label for="rating" class="form-label">Rating</label>
+        <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
+      </div>
+      <div class="mb-3 mt-3">
+        <label for="comment" class="form-label">Comment</label>
+        <textarea name="review[comment]" id="comment" cols="30" rows="4" class="form-control" required></textarea>
+        <div class="invalid-feedback">Please Enter some Comments</div>
+      </div>
+      <button class="btn btn-outline-dark">Submit</button>
+    </form>
+
+    <hr />
+    <p><b>All Reviews</b></p>
+    <% if (listing.reviews.length === 0) { %>
+      <p>No reviews yet.</p>
+    <% } else { %>
+      <div class="card">
+        <% for (let review of listing.reviews) { %>
+          <div class="card-body border-bottom">
+            <h5 class="card-title">Customer</h5>
+            <p class="card-text">Rating: <%= review.rating %></p>
+            <p class="card-text">Comment: <%= review.comment %></p>
+            <% if (review.createdAt) { %>
+              <p class="card-text">Created At: <%= review.createdAt.toLocaleDateString("en-IN") %></p>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>
