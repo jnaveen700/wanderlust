@@ -52,15 +52,23 @@
     <% if (listing.reviews.length === 0) { %>
       <p>No reviews yet.</p>
     <% } else { %>
-      <div class="card">
+      <div class="row">
         <% for (let review of listing.reviews) { %>
-          <div class="card-body border-bottom">
-            <h5 class="card-title">Customer</h5>
-            <p class="card-text">Rating: <%= review.rating %></p>
-            <p class="card-text">Comment: <%= review.comment %></p>
-            <% if (review.createdAt) { %>
-              <p class="card-text">Created At: <%= review.createdAt.toLocaleDateString("en-IN") %></p>
-            <% } %>
+          <div class="card col-5 ms-3 mb-3 review-card">
+            <div class="card-body">
+              <h5 class="card-title">Customer</h5>
+              <p class="card-text">Rating: <%= review.rating %> Stars</p>
+              <p class="card-text">Comment: <%= review.comment %></p>
+              <% if (review.createdAt) { %>
+                <p class="card-text">Created At: <%= review.createdAt.toLocaleDateString("en-IN") %></p>
+              <% } %>
+              <form
+                  class="mb-3"
+                  method="POST"
+                  action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                <button class="btn btn-danger">Delete</button>
+              </form>
+            </div>
           </div>
         <% } %>
       </div>
