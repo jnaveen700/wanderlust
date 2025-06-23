@@ -8,6 +8,6 @@ const reviewSchema = new Schema({
         min: 1,
         max: 5,
     },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Review", reviewSchema);

@@ -1,25 +1,30 @@
 <% layout("/layouts/boilerplate") %>
 
 <body>
-    <div class="container mt-4">
-        <h3>All Listings</h3>
+  <div class="container mt-4">
+    <h3>All Listings</h3>
 
-        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
-            <% for (let listing of allListings) { %>
-                <div class="col">
-                    <div class="card h-100" style="height: 25rem;">
-                        <a href="/listings/<%= listing._id %>" class="listing-link">
-                            <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
-                        </a>
-                        <div class="card-body">
-                            <p class="card-text">
-                                <b><%= listing.title %></b> <br />
-                                ₹ <%= listing.price.toLocaleString("en-IN") %>/night
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            <% } %>
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+      <% for (let listing of allListings) { %>
+        <div class="col">
+          <div class="card h-100">
+            <a href="/listings/<%= listing._id %>" class="listing-link">
+              <img 
+                src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60' %>" 
+                class="card-img-top" 
+                alt="listing_image" 
+                style="height: 20rem; object-fit: cover;"
+              >
+            </a>
+            <div class="card-body">
+              <p class="card-text">
+                <b><%= listing.title %></b> <br />
+                ₹ <%= listing.price.toLocaleString("en-IN") %>/night
+              </p>
+            </div>
+          </div>
         </div>
+      <% } %>
     </div>
+  </div>
 </body>
