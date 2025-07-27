@@ -1,5 +1,5 @@
 <% layout("/layouts/boilerplate") %>
-<body>
+
   <div class="container mt-4">
     <h3>All Listings</h3>
 
@@ -18,7 +18,7 @@
             <div class="card-body">
               <p class="card-text">
                 <b><%= listing.title %></b> <br />
-                ₹ <%= listing.price.toLocaleString("en-IN") %>/night
+                ₹ <%= (typeof listing.price === "number" ? listing.price.toLocaleString("en-IN") : "N/A") %>/night
               </p>
             </div>
           </div>
@@ -26,4 +26,4 @@
       <% } %>
     </div>
   </div>
-</body>
+
