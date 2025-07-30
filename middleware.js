@@ -1,4 +1,5 @@
 const Listing = require("./models/listing.js"); 
+const review = require("./models/review.js")
 const { listingSchema, reviewSchema } = require("./schema.js");
 const ExpressError = require("./utils/ExpressError.js");
 
@@ -51,7 +52,23 @@ const validateReview = (req, res, next) => {
     next();
 };
 
+const isReviewAuthor = async (req, res, next) => {
+    const { id , reviewId } = req.params;
+    try {
+        const review = await Review.findById(reviewId);
+        if (!review.author.equals(res.locals.currUser._id)) {
+            req.flash("error", "You don't have permission to do that!");
+            return res.redirect(`/listings/${id}`);
+        }
+        next();
+    } catch (err) {
+        req.flash("error", "Something went wrong!");
+        res.redirect("/listings");
+    }
+};
+
 module.exports = {
+    isReviewAuthor,
     validateReview,
     validateListing ,
     isLoggedIn,

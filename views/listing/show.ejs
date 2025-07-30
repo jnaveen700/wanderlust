@@ -62,18 +62,20 @@
         <% for (let review of listing.reviews) { %>
           <div class="card col-5 ms-3 mb-3 review-card">
             <div class="card-body">
-              <h5 class="card-title"><%= review.author ? review.author.username : "Deleted User" %></h5>
+              <h5 class="card-title">@<%= review.author ? review.author.username : "Deleted User" %></h5>
               <p class="card-text">Rating: <%= review.rating %> Stars</p>
               <p class="card-text">Comment: <%= review.comment %></p>
               <% if (review.createdAt) { %>
                 <p class="card-text">Created At: <%= review.createdAt.toLocaleDateString("en-IN") %></p>
               <% } %>
+              <% if(currUser && currUser._id.equals(review.author._id)) { %>
               <form
                 class="mb-3"
                 method="POST"
                 action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
                 <button class="btn btn-danger">Delete</button>
               </form>
+              <% } %>
             </div>
           </div>
         <% } %>
