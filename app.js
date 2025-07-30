@@ -49,6 +49,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
     next();
 })
 
@@ -60,8 +61,10 @@ app.get("/", (req, res) => {
 // Routes
 //listings routes   
 app.use("/listings",listingRouter);
+
 //Review routes
 app.use("/listings/:id/reviews", reviewRouter);
+
 //User routes
 app.use("/", userRouter);
 
