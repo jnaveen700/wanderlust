@@ -19,9 +19,19 @@ const listingSchema = new Schema({
         default: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60",
         }
     },
-    price: Number,
-    location: String,
-    country: String,
+    price: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    location: {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true
+    },
     reviews: [
         {
             type: Schema.Types.ObjectId,

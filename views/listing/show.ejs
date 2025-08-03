@@ -68,7 +68,7 @@
               <% if (review.createdAt) { %>
                 <p class="card-text">Created At: <%= review.createdAt.toLocaleDateString("en-IN") %></p>
               <% } %>
-              <% if(currUser && currUser._id.equals(review.author._id)) { %>
+              <% if (currUser && review.author && currUser._id.equals(review.author._id)) { %>
               <form
                 class="mb-3"
                 method="POST"
