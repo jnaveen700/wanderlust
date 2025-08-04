@@ -1,3 +1,6 @@
+if(process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -67,9 +70,6 @@ app.use("/listings/:id/reviews", reviewRouter);
 
 //User routes
 app.use("/", userRouter);
-
-
-
 
 
 // 404 handler
