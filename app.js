@@ -62,15 +62,14 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-//listings routes   
-app.use("/listings",listingRouter);
-
-//Review routes
-app.use("/listings/:id/reviews", reviewRouter);
-
-//User routes
+//User routes - put the most general-purpose routes at the top
 app.use("/", userRouter);
 
+//listings routes   
+app.use("/listings",listingRouter);
+
+//Review routes - this one is nested within a listings path, so it goes after listingsRouter
+app.use("/listings/:id/reviews", reviewRouter);
 
 // 404 handler
 app.all("*", (req, res, next) => {

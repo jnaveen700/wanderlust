@@ -13,7 +13,7 @@ router
     // Index route
     .get(wrapAsync(listingsController.index))
     //createListing
-    .post(upload.single("image") , validateListing ,isLoggedIn,wrapAsync(listingsController.createListing)
+    .post(isLoggedIn, upload.single("image") , validateListing ,wrapAsync(listingsController.createListing)
 );
 
 
@@ -24,7 +24,7 @@ router.route("/:id")
     //showListings
     .get(wrapAsync(listingsController.showListing))
     //updateListings
-    .put(isLoggedIn, isOwner, listingsController.updateListing)
+    .put(isLoggedIn, isOwner,upload.single("image"),validateListing ,wrapAsync( listingsController.updateListing))
     // Delete listing
     .delete(isLoggedIn ,isOwner, wrapAsync(listingsController.destroyListing)
 );

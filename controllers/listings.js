@@ -45,15 +45,28 @@ module.exports.renderEditForm = async (req, res) => {
         req.flash("error", "Listing not found!");
         return res.redirect("/listings");
     }
-    res.render("listing/edit", { listing });
+    let originalImageUrl = listing.image.url;
+    originalImageUrl = originalImageUrl.replace("/upload","/upload/,w_250");
+    res.render("listing/edit", { listing , originalImageUrl});
 };
 
 module.exports.updateListing = async (req, res) => {
     const { id } = req.params;
-    const listing = await Listing.findByIdAndUpdate(id, req.body.listing, { new: true });
+    let listing = await Listing.findByIdAndUpdate(id, req.body.listing, { new: true }); 
+    // Check if a file was uploaded
+    if (typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+
+        listing.image = {
+            url: url,
+            filename: filename
+        };
+    await listing.save();}
     req.flash("success", "Listing updated successfully!");
     res.redirect(`/listings/${listing._id}`);
 };
+
 
 module.exports.destroyListing = async (req, res) => {
     const { id } = req.params;

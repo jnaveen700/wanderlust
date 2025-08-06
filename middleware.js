@@ -35,7 +35,7 @@ const isOwner = async (req, res, next) => {
 };
 
 const validateListing = (req, res, next) => {
-    const { error } = listingSchema.validate(req.body);
+    const { error } = listingSchema.validate({ listing: req.body.listing }); // ✅ Wrap in `listing`
     if (error) {
         const errmsg = error.details.map(el => el.message).join(", ");
         throw new ExpressError(400, errmsg);
