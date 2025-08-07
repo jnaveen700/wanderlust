@@ -8,7 +8,6 @@ const listingSchema = new Schema({
         required: true,
     },
     description: String,
-    // Flattened image structure
     image: {
         filename: {
             type: String,
@@ -31,6 +30,18 @@ const listingSchema = new Schema({
     country: {
         type: String,
         required: true
+    },
+    // 🚨 NEW CODE: The geometry field to store coordinates
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
     },
     reviews: [
         {
