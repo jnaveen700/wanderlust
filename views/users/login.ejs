@@ -1,7 +1,8 @@
 <% layout ("/layouts/boilerplate") %>
 <div class="row mt-3">
     <div class="col-8 offset-2">
-        <form method="POST" action="/login" class="needs-validation" novalidate>
+        <!-- Add an ID to the form -->
+        <form id="login-form" method="POST" action="/login" class="needs-validation" novalidate>
             <h3>Login</h3>
 
             <div class="mb-3">
@@ -16,6 +17,8 @@
                 <div class="invalid-feedback">Password is required.</div>
             </div>
 
-            <button type="submit" class="btn btn-success">Login</button>
+            <!-- Add the 'form' attribute to the button -->
+            <button type="submit" class="btn btn-success" form="login-form">Login</button>
         </form>
     </div>
+</div>

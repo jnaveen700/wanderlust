@@ -53,6 +53,11 @@ const listingSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User",
     },
+    category: {
+        type: String,
+        enum: ['trending', 'rooms', 'iconic cities', 'mountains', 'castles', 'pools', 'camping', 'arctic', 'forests', 'miscellaneous'],
+        default: 'miscellaneous',
+    },
 });
 
 // Middleware to delete all associated reviews when a listing is deleted

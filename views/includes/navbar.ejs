@@ -1,6 +1,42 @@
+<style>
+  .search-btn{
+    background-color: #fe424d;
+    color:#fff;
+    border-radius: 25px;
+    padding: 0 1rem 0 1rem;
+    display: flex;
+    align-items: center;
+  }
+  .search-btn:hover {
+    background-color: white;
+    color:#fe424d;
+    border: 1px solid #fe424d;
+  }
+ .search-btn i {
+  display: inline;
+  margin-right: 0.5rem;
+ }
+ .search-input {
+    width: 300px;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+  }
+  .search-input:focus {
+    box-shadow: none;
+    border-color: #fe424d;
+  }
+  .navbar-nav a {
+    color: #333;
+  }
+  .navbar-nav a:hover {
+    color: #fe424d;
+  }
+</style>
+
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/"><i class="fa-solid fa-location-arrow"></i></a>
+    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-location-arrow"></i></a>
     <button
       class="navbar-toggler"
       type="button"
@@ -11,18 +47,62 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-link" href="/">Home</a>
-        <a class="nav-link" href="/listings">All Listings</a>
-        <a class="nav-link" href="/listings/new">Add New Listing</a>
+        <a class="nav-link" href="/listings">Explore</a>
       </div>
+
       <div class="navbar-nav ms-auto">
+        <!-- The <form> tag has been removed to prevent conflicts -->
+        <div class="d-flex">
+          <input
+            id="search-input-nav"
+            class="form-control me-2 search-input"
+            type="search"
+            placeholder="Search Destinations"
+            aria-label="Search"
+          />
+          <!-- The button type is now "button" -->
+          <button id="search-btn-nav" class="btn search-btn" type="button">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            Search
+          </button>
+        </div>
+      </div>
+
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/listings/new">Wanderlust your home</a>
         <% if (currUser) { %>
           <span class="navbar-text">Welcome, <%= currUser.username %>!</span>
-          <a class="nav-link" href="/logout">Logout</a>
+          <a class="nav-link" href="/logout"><b>Logout</b></a>
         <% } else { %>
-          <a class="nav-link" href="/login">Login</a>
-          <a class="nav-link" href="/signup">SignUp</a>
+          <a class="nav-link" href="/login"><b>Login</b></a>
+          <a class="nav-link" href="/signup"><b>SignUp</b></a>
         <% } %>
+      </div>
     </div>
   </div>
 </nav>
+
+<!-- This script makes the search bar work without a form -->
+<script>
+  const searchButton = document.getElementById('search-btn-nav');
+  const searchInput = document.getElementById('search-input-nav');
+
+  const performSearch = () => {
+    const query = searchInput.value;
+    // Only redirect if there is a query to search for
+    if (query) {
+      window.location.href = `/listings/search?query=${encodeURIComponent(query)}`;
+    }
+  };
+
+  // Handle clicking the search button
+  searchButton.addEventListener('click', performSearch);
+
+  // Handle pressing "Enter" in the search input
+  searchInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevents any default "enter" behavior
+      performSearch();
+    }
+  });
+</script>
