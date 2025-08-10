@@ -78,7 +78,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// CORRECTED ROUTE ORDER
+// 🚨 DEPLOYMENT FIX: Add a root route to redirect to the main page
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
+// ROUTE ORDER
 // The most specific routes should come first.
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/listings", listingRouter);
