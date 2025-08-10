@@ -58,20 +58,21 @@ module.exports.createListing = async (req, res, next) => {
         return res.redirect("/listings/new");
     }
 
+    // Create the new listing. Mongoose will apply the default image here.
     const newListing = new Listing(req.body.listing);
     
     newListing.geometry = {
         type: "Point",
         coordinates: [geocodingResponse[0].longitude, geocodingResponse[0].latitude]
     };
-
-    let url = req.file.path;
-    let filename = req.file.filename;
     
     newListing.owner = req.user._id;
-    newListing.image = {
-        url: url,
-        filename: filename
+
+    // 🚨 NEW LOGIC: Overwrite the default image ONLY if a new file was uploaded.
+    if (req.file) {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        newListing.image = { url, filename };
     }
 
     await newListing.save();
@@ -96,48 +97,18 @@ module.exports.renderEditForm = async (req, res) => {
 
 module.exports.updateListing = async (req, res) => {
     const { id } = req.params;
-    let listing = await Listing.findById(id); 
+    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
 
-    if (!listing) {
-        req.flash("error", "The listing you requested to update does not exist!");
-        return res.redirect("/listings");
-    }
-
-    // Important check to avoid unnecessary API calls to the geocoder
-    const newLocation = req.body.listing.location;
-    const newCountry = req.body.listing.country;
-
-    if (listing.location !== newLocation || listing.country !== newCountry) {
-        const fullAddress = `${newLocation}, ${newCountry}`;
-        const geocodingResponse = await geocoder.geocode(fullAddress);
-
-        if (Array.isArray(geocodingResponse) && geocodingResponse.length > 0) {
-            listing.geometry = {
-                type: "Point",
-                coordinates: [geocodingResponse[0].longitude, geocodingResponse[0].latitude]
-            };
-        } else {
-            req.flash("error", "Could not find coordinates for the new location. Please try a different address.");
-            return res.redirect(`/listings/${listing._id}/edit`);
-        }
-    }
-    
-    await Listing.findByIdAndUpdate(id, req.body.listing);
-
+    // This check correctly handles updating the image only if a new one is provided.
     if (typeof req.file !== "undefined") {
         let url = req.file.path;
         let filename = req.file.filename;
-
-        listing.image = {
-            url: url,
-            filename: filename
-        };
+        listing.image = { url, filename };
+        await listing.save();
     }
-    
-    await listing.save();
 
     req.flash("success", "Listing updated successfully!");
-    res.redirect(`/listings/${listing._id}`);
+    res.redirect(`/listings/${id}`);
 };
 
 // This search function looks solid!
