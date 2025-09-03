@@ -65,6 +65,24 @@
                 <div class="valid-feedback">Looks good!</div>
             </div>
 
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="listing[category]" class="form-control" required>
+                    <option value="">Select a category</option>
+                    <option value="trending">Trending</option>
+                    <option value="rooms">Rooms</option>
+                    <option value="iconic cities">Iconic Cities</option>
+                    <option value="mountains">Mountains</option>
+                    <option value="castles">Castles</option>
+                    <option value="pools">Pools</option>
+                    <option value="camping">Camping</option>
+                    <option value="arctic">Arctic</option>
+                    <option value="forests">Forests</option>
+                    <option value="miscellaneous">Miscellaneous</option>
+                </select>
+                <div class="invalid-feedback">Please select a category</div>
+            </div>
+
             <button type="submit" class="btn btn-dark add-btn mt-3">Add</button>
         </form>
     </div>

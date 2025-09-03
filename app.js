@@ -38,7 +38,18 @@ app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "/public")));
+
+// Cache static assets
+app.use(express.static(path.join(__dirname, "/public"), {
+    maxAge: '1h',
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css') || path.endsWith('.js')) {
+            res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+        } else if (path.endsWith('.jpg') || path.endsWith('.png') || path.endsWith('.gif')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+        }
+    }
+}));
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -52,11 +63,12 @@ const sessionOptions = {
     store: store,
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized : true,
+    saveUninitialized: true,
     cookie: {
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-        maxAge : 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+        sameSite: 'lax' // Protects against CSRF while allowing normal navigation
     },
 };
 
@@ -83,6 +95,12 @@ app.get("/", (req, res) => {
     res.redirect("/listings");
 });
 
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 // ROUTE ORDER
 // The most specific routes should come first.
 app.use("/listings/:id/reviews", reviewRouter);
@@ -91,6 +109,11 @@ app.use("/", userRouter); // General routes come last
 
 // 404 handler
 app.all("*", (req, res, next) => {
+    // Suppress Chrome DevTools probe requests from logging as errors
+    if (req.originalUrl === '/.well-known/appspecific/com.chrome.devtools.json') {
+        return res.status(204).end(); // No Content, no error
+    }
+    console.log(`[404] No route found for ${req.method} ${req.originalUrl}`);
     next(new ExpressError(404, "Page Not Found!!!"));
 });
 
@@ -101,7 +124,22 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error", { message });
 });
 
-// Start server
-app.listen(8080, () => {
-    console.log("Server is listening on port 8080");
-});
+// Start server with port from environment variable or fallback to 8080
+const startServer = (initialPort) => {
+    const server = app.listen(initialPort)
+        .on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.log(`Port ${initialPort} is busy, trying ${initialPort + 1}...`);
+                startServer(initialPort + 1);
+            } else {
+                console.error('Server error:', err);
+            }
+        })
+        .on('listening', () => {
+            const actualPort = server.address().port;
+            console.log(`Server is running at http://localhost:${actualPort}`);
+        });
+};
+
+const initialPort = process.env.PORT || 8080;
+startServer(initialPort);

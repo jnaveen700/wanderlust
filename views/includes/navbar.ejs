@@ -1,42 +1,164 @@
 <style>
-  .search-btn{
-    background-color: #fe424d;
-    color:#fff;
-    border-radius: 25px;
-    padding: 0 1rem 0 1rem;
+  .navbar {
+    padding: 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fe424d !important;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
   }
-  .search-btn:hover {
-    background-color: white;
-    color:#fe424d;
-    border: 1px solid #fe424d;
+
+  .navbar {
+    padding: 0.75rem 1rem;
   }
- .search-btn i {
-  display: inline;
-  margin-right: 0.5rem;
- }
- .search-input {
-    width: 300px;
+
+  .navbar .container-fluid {
+    padding: 0;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fe424d !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .search-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .search-form {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .search-input {
+    flex: 1;
     border-radius: 25px;
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #ddd;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    min-width: 0; /* Prevents input from overflowing */
   }
+
   .search-input:focus {
-    box-shadow: none;
+    box-shadow: 0 0 0 2px rgba(254, 66, 77, 0.1);
+    border-color: #fe424d;
+    outline: none;
+  }
+
+  .search-btn {
+    background-color: #fe424d;
+    color: #fff;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    min-width: 60px;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .search-btn:hover {
+    background-color: #fff;
+    color: #fe424d;
     border-color: #fe424d;
   }
+
+  .navbar-nav {
+    margin-left: auto;
+  }
+
   .navbar-nav a {
     color: #333;
+    font-weight: 500;
   }
+
   .navbar-nav a:hover {
     color: #fe424d;
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 0.5rem;
+    }
+
+    .navbar-brand {
+      font-size: 1.25rem;
+    }
+
+    .search-container {
+      padding: 0.5rem 0;
+    }
+
+    .search-input {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .search-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .navbar-collapse {
+      background: white;
+      padding: 1rem;
+      margin: 0 -0.5rem;
+      border-top: 1px solid #eee;
+    }
+
+    .navbar-nav {
+      margin-top: 0.5rem;
+    }
+
+    .nav-link {
+      padding: 0.5rem 0;
+    }
   }
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-location-arrow"></i></a>
+    <!-- Logo -->
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-solid fa-location-arrow"></i>
+      Wanderlust
+    </a>
+
+    <!-- Centered search input -->
+    <div class="d-none d-md-flex flex-grow-1 justify-content-center">
+      <div class="search-container position-relative">
+        <form class="d-flex" action="/listings/search" method="GET">
+          <input
+            type="search"
+            name="query"
+            class="form-control search-input"
+            placeholder="Where to?"
+            aria-label="Search"
+          />
+          <button class="btn btn-search" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Mobile toggle -->
     <button
       class="navbar-toggler"
       type="button"
@@ -45,64 +167,183 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <!-- Nav items -->
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
-      </div>
-
-      <div class="navbar-nav ms-auto">
-        <!-- The <form> tag has been removed to prevent conflicts -->
-        <div class="d-flex">
+      <!-- Mobile search -->
+      <div class="d-md-none w-100 mb-3">
+        <form action="/listings/search" method="GET">
           <input
-            id="search-input-nav"
-            class="form-control me-2 search-input"
             type="search"
-            placeholder="Search Destinations"
-            aria-label="Search"
+            name="query"
+            class="form-control search-input"
+            placeholder="Where to?"
           />
-          <!-- The button type is now "button" -->
-          <button id="search-btn-nav" class="btn search-btn" type="button">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            Search
-          </button>
-        </div>
+        </form>
       </div>
 
       <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Wanderlust your home</a>
+        <a class="nav-link" href="/listings">Explore</a>
         <% if (currUser) { %>
-          <span class="navbar-text">Welcome, <%= currUser.username %>!</span>
-          <a class="nav-link" href="/logout"><b>Logout</b></a>
+          <a class="nav-link" href="/listings/new">Host a Stay</a>
+          <a class="nav-link" href="/logout">Logout</a>
         <% } else { %>
-          <a class="nav-link" href="/login"><b>Login</b></a>
-          <a class="nav-link" href="/signup"><b>SignUp</b></a>
+          <a class="nav-link" href="/login">Login</a>
+          <a class="nav-link" href="/signup">Sign up</a>
         <% } %>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- This script makes the search bar work without a form -->
+<style>
+.navbar {
+  padding: 0.5rem 1rem;
+  background: white;
+}
+
+.navbar-brand {
+  color: #ff385c !important;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.navbar-brand i {
+  margin-right: 0.25rem;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.search-container form {
+  background: white;
+  border: 1px solid #dddddd;
+  border-radius: 40px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.search-container form:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  width: 100%;
+  color: #222222;
+}
+
+.search-input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #717171;
+}
+
+.btn-search {
+  background-color: #ff385c;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  margin: 4px;
+  border-radius: 24px;
+  font-weight: 500;
+  min-width: 100px;
+  transition: background-color 0.2s;
+}
+
+.btn-search:hover {
+  background-color: #e31c5f;
+  color: white;
+}
+
+.nav-link {
+  color: #222 !important;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.nav-link:hover {
+  background: #f7f7f7;
+  border-radius: 22px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+    padding: 16px;
+  }
+
+  .navbar-collapse {
+    background: white;
+    padding: 16px;
+    margin: 0 -16px;
+    border-top: 1px solid #eee;
+  }
+
+  .search-form {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .nav-link {
+    padding: 12px 16px;
+    border-radius: 0;
+  }
+
+  .nav-link:hover {
+    background: #f7f7f7;
+    border-radius: 0;
+  }
+}
+</style>
+
 <script>
-  const searchButton = document.getElementById('search-btn-nav');
-  const searchInput = document.getElementById('search-input-nav');
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.querySelector('.search-form');
+    const searchInput = document.getElementById('search-input-nav');
 
-  const performSearch = () => {
-    const query = searchInput.value;
-    // Only redirect if there is a query to search for
-    if (query) {
-      window.location.href = `/listings/search?query=${encodeURIComponent(query)}`;
-    }
-  };
+    searchForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const query = searchInput.value.trim();
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentCategory = urlParams.get('category');
+      
+      if (!query && !currentCategory) {
+        window.location.href = '/listings';
+        return;
+      }
+      
+      const params = new URLSearchParams(new FormData(searchForm));
+      
+      if (currentCategory) {
+        params.append('category', currentCategory);
+      }
+      
+      window.location.href = `/listings/search?${params.toString()}`;
+    });
 
-  // Handle clicking the search button
-  searchButton.addEventListener('click', performSearch);
-
-  // Handle pressing "Enter" in the search input
-  searchInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault(); // Prevents any default "enter" behavior
-      performSearch();
+    // Restore search query from URL if it exists
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('query');
+    if (searchQuery) {
+      searchInput.value = decodeURIComponent(searchQuery);
+      searchInput.focus();
     }
   });
 </script>

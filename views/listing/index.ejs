@@ -4,18 +4,44 @@
   /* This new container will hold both the filters and the tax toggle */
   .filter-bar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 1rem;
     margin-bottom: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .filter-bar {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
   }
 
   /* This container holds all your filter icons */
   #filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem; /* Added gap for better spacing */
-    justify-content: flex-start; /* Aligns filters to the left */
+    flex-wrap: nowrap;
+    gap: 2rem;
+    justify-content: flex-start;
     align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+  }
+
+  #filters::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari and Opera */
+  }
+
+  @media (max-width: 768px) {
+    #filters {
+      gap: 1.5rem;
+    }
+    .filter {
+      min-width: 60px;
+    }
   }
 
   .filter {
@@ -45,12 +71,26 @@
   }
 
   #tax-toggle {
-    display: flex; /* Made it a flex container to center the content */
+    display: flex;
     align-items: center;
-    border: 1px solid black;
-    border-radius: 1rem;
-    height: 3.5rem;
-    padding: 0 1rem; /* Adjusted padding for better vertical centering */
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: #666;
+    background: #f8f9fa;
+  }
+  
+  @media (max-width: 768px) {
+    #tax-toggle {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 1000;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 0.8rem;
+    }
   }
 </style>
 
@@ -109,26 +149,194 @@
   <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-3">
     <% for (let listing of allListings) { %>
       <div class="col">
-        <div class="card h-100">
+        <div class="card listing-card">
           <a href="/listings/<%= listing._id %>" class="listing-link">
             <img 
               src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60' %>" 
               class="card-img-top" 
-              alt="listing_image" 
-              style="height: 20rem; object-fit: cover;"
+              alt="<%= listing.title %>"
             >
+            <% if (listing.category) { %>
+              <div class="category-tag">
+                <i class="fa-solid 
+                  <%= listing.category === 'trending' ? 'fa-fire' :
+                      listing.category === 'rooms' ? 'fa-bed' :
+                      listing.category === 'iconic cities' ? 'fa-mountain-city' :
+                      listing.category === 'mountains' ? 'fa-mountain' :
+                      listing.category === 'castles' ? 'fa-fort-awesome' :
+                      listing.category === 'pools' ? 'fa-person-swimming' :
+                      listing.category === 'camping' ? 'fa-campground' :
+                      listing.category === 'arctic' ? 'fa-snowflake' :
+                      listing.category === 'forests' ? 'fa-tree' : 'fa-house' %>">
+                </i>
+                <%= listing.category.charAt(0).toUpperCase() + listing.category.slice(1) %>
+              </div>
+            <% } %>
           </a>
           <div class="card-body">
             <p class="card-text">
-              <b><%= listing.title %></b> <br />
-              ₹ <%= (typeof listing.price === "number" ? listing.price.toLocaleString("en-IN") : "N/A") %>/night
-              <i class="tax-info"> &nbsp; +18% GST</i>
+              <b><%= listing.title %></b> <br>
+              <span class="listing-location"><%= listing.location %></span><br>
+              <span class="listing-price">₹ <%= (typeof listing.price === "number" ? listing.price.toLocaleString("en-IN") : "N/A") %>/night</span>
+              <span class="tax-info">&nbsp;+18% GST</span>
             </p>
           </div>
         </div>
       </div>
     <% } %>
   </div>
+
+<style>
+/* Desktop Styles (default) */
+.card {
+  border: none;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card-img-top {
+  height: 20rem;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.card-body {
+  padding: 16px 0;
+}
+
+.listing-location {
+  color: #717171;
+  font-size: 0.9rem;
+}
+
+.listing-price {
+  font-weight: 600;
+}
+
+.tax-info {
+  color: #717171;
+  font-size: 0.9rem;
+}
+
+.category-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #222;
+}
+
+.category-tag i {
+  margin-right: 5px;
+  color: #fe424d;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .card-img-top {
+    height: 200px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .card-body {
+    padding: 12px;
+  }
+
+  .listing-location {
+    font-size: 0.85rem;
+  }
+
+  .listing-price {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .category-tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+</style>
+
+<style>
+  .listing-card {
+    transition: transform 0.2s ease;
+  }
+
+  .listing-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .listing-card:hover .card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .category-badge {
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    color: #fe424d;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .category-badge i {
+    margin-right: 0.5rem;
+  }
+
+  .location {
+    font-size: 0.875rem;
+  }
+
+  .location i {
+    color: #fe424d;
+    margin-right: 0.25rem;
+  }
+
+  .pricing {
+    border-top: 1px solid #eee;
+    padding-top: 0.75rem;
+  }
+
+  .card-img-top {
+    transition: transform 0.3s ease;
+  }
+
+  .listing-card:hover .card-img-top {
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 768px) {
+    .category-badge {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .price {
+      font-size: 0.9rem;
+    }
+  }
+</style>
 </div>
 
 <script>

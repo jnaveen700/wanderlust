@@ -1,14 +1,14 @@
 <% layout("layouts/boilerplate") %>
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h3><%= listing.title %></h3>
+        <div class="col-12 col-md-8">
+            <h3 class="mb-3"><%= listing.title %></h3>
             <div class="card">
                 <img 
                     class="card-img-top" 
-                    src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60' %>" 
+                    src="<%= listing.image && listing.image.url ? listing.image.url.replace('/upload/', '/upload/c_scale,w_auto,dpr_auto,f_auto,q_auto/') : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60' %>" 
                     alt="listing_image"
-                    style="width: 100%; height: auto; max-height: 500px;"
+                    style="width: 100%; height: auto; max-height: 500px; object-fit: cover;"
                 />
                 <div class="card-body">
                     <p class="card-text mb-1"><strong>Owned by:</strong> <%= listing.owner ? listing.owner.username : 'Unknown' %></p>
@@ -75,10 +75,11 @@
             <% } %>
             <% if (listing.reviews.length > 0) { %>
             <p><b>All Reviews</b></p>
-            <div class="row">
+            <div class="row g-3">
                 <% for (let review of listing.reviews) { %>
-                <div class="card col-5 ms-3 mb-3 review-card">
-                    <div class="card-body">
+                <div class="col-12 col-md-6">
+                    <div class="card review-card">
+                        <div class="card-body">
                         <h5 class="card-title">@<%= review.author ? review.author.username : "Deleted User" %></h5>
                         <p class="starability-result" data-rating="<%= review.rating %>"></p>
                         <p class="card-text">Comment: <%= review.comment %></p>
