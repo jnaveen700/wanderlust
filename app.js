@@ -17,18 +17,22 @@ const ExpressError = require("./utils/ExpressError.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const aiRouter = require("./routes/ai.js");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const seedDatabase = require("./init/seedDatabase.js");
 
 const dbUrl = process.env.ATLASDB_URL;
 
 async function main() {
     await mongoose.connect(dbUrl);
     console.log("connected to db");
+    // Seed database with sample listings if needed
+    await seedDatabase();
 }
 
 main().catch(err => {
@@ -38,6 +42,7 @@ main().catch(err => {
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
+app.use(express.json()); // Add JSON parsing middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public")));
@@ -89,6 +94,7 @@ app.get("/", (req, res) => {
 // The most specific routes should come first.
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/listings", listingRouter);
+app.use("/", aiRouter);
 app.use("/", userRouter); // General routes come last
 
 // 404 handler

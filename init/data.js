@@ -405,6 +405,34 @@ const sampleListings = [
       category: "rooms",
       geometry: { type: "Point", coordinates: [-83.7534, 9.7489] }
     },
+    {
+      title: "Modern Resort in Okinawa",
+      description:
+        "Relax on pristine beaches in this luxury resort in Okinawa. Features crystal clear waters, water sports, and stunning ocean views with private villa accommodations.",
+      image: {
+        filename: "listingimage",
+        url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhY2glMjByZXNvcnR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=60",
+      },
+      price: 2800,
+      location: "Okinawa",
+      country: "Japan",
+      category: "pools",
+      geometry: { type: "Point", coordinates: [127.6809, 26.1927] }
+    },
+    {
+      title: "Mountain Retreat near Fuji with Hot Springs",
+      description:
+        "A peaceful mountain lodge with breathtaking views of Mount Fuji. Perfect for relaxation with natural hot spring baths, hiking trails, and experiencing Japan's natural beauty.",
+      image: {
+        filename: "listingimage",
+        url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW91bnRhaW4lMjBsb2RnZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+      },
+      price: 2200,
+      location: "Hakone",
+      country: "Japan",
+      category: "mountains",
+      geometry: { type: "Point", coordinates: [139.1192, 35.2330] }
+    },
   ];
   
   module.exports = { data: sampleListings };

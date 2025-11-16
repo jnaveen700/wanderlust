@@ -16,6 +16,21 @@
     padding: 0.75rem 1rem;
   }
 
+  .navbar-container {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0;
+  }
+
+  .navbar-search {
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
   .navbar .container-fluid {
     padding: 0;
   }
@@ -29,9 +44,19 @@
     gap: 0.5rem;
     margin-right: 1rem;
     flex-shrink: 0;
+    grid-column: 1;
+  }
+
+  .navbar-collapse {
+    grid-column: 4;
+  }
+
+  .navbar-toggler {
+    grid-column: 3;
   }
 
   .search-container {
+    width: 100%;
     max-width: 600px;
     margin: 0 auto;
   }
@@ -82,7 +107,8 @@
   }
 
   .navbar-nav {
-    margin-left: auto;
+    display: flex;
+    gap: 0;
   }
 
   .navbar-nav a {
@@ -99,8 +125,28 @@
       padding: 0.5rem;
     }
 
+    .navbar-container {
+      grid-template-columns: auto auto auto;
+      gap: 0.5rem;
+    }
+
+    .navbar-search {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+
     .navbar-brand {
       font-size: 1.25rem;
+      grid-column: 1;
+    }
+
+    .navbar-toggler {
+      grid-column: 3;
+    }
+
+    .navbar-collapse {
+      grid-column: 1 / -1;
+      order: 4;
     }
 
     .search-container {
@@ -135,7 +181,7 @@
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
+  <div class="container-fluid navbar-container">
     <!-- Logo -->
     <a class="navbar-brand" href="/listings">
       <i class="fa-solid fa-location-arrow"></i>
@@ -143,17 +189,22 @@
     </a>
 
     <!-- Centered search input -->
-    <div class="d-none d-md-flex flex-grow-1 justify-content-center">
+    <div class="navbar-search">
       <div class="search-container position-relative">
-        <form class="d-flex" action="/listings/search" method="GET">
+        <form class="d-flex" id="search-form-nav" action="#" method="GET">
           <input
             type="search"
             name="query"
+            id="search-input-nav"
             class="form-control search-input"
             placeholder="Where to?"
             aria-label="Search"
           />
-          <button class="btn btn-search" type="submit">Search</button>
+          <!-- Only AI Search Button -->
+          <button type="button" id="ai-guide-btn" class="btn btn-ai-search" title="Let AI interpret your preferences">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span class="ai-text">AI Search</span>
+          </button>
         </form>
       </div>
     </div>
@@ -214,7 +265,7 @@
 
 .search-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -267,6 +318,101 @@
   color: white;
 }
 
+.btn-ai {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 25px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-ai:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-ai i {
+  font-size: 1.1rem;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.btn-ai-inline {
+  background: transparent;
+  color: #667eea;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  margin-right: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.btn-ai-inline:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #764ba2;
+}
+
+.btn-ai-inline i {
+  font-size: 1rem;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.btn-ai-search {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  margin: 4px;
+  border-radius: 24px;
+  font-weight: 500;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-ai-search:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-ai-search i {
+  font-size: 1.1rem;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.ai-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .nav-link {
   color: #222 !important;
   font-weight: 500;
@@ -314,36 +460,81 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.querySelector('.search-form');
+    const searchForm = document.getElementById('search-form-nav');
     const searchInput = document.getElementById('search-input-nav');
+    const aiGuideBtn = document.getElementById('ai-guide-btn');
 
-    searchForm.addEventListener('submit', function(event) {
-      event.preventDefault();
+    // Function to perform AI search
+    async function performAISearch() {
+      const userPreferences = searchInput.value.trim();
       
-      const query = searchInput.value.trim();
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentCategory = urlParams.get('category');
-      
-      if (!query && !currentCategory) {
-        window.location.href = '/listings';
+      if (!userPreferences) {
+        alert('Please enter your travel preferences');
         return;
       }
-      
-      const params = new URLSearchParams(new FormData(searchForm));
-      
-      if (currentCategory) {
-        params.append('category', currentCategory);
+
+      // Show loading state
+      aiGuideBtn.disabled = true;
+      const originalHTML = aiGuideBtn.innerHTML;
+      aiGuideBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      try {
+        const response = await fetch('/ai-recommendations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userPreferences })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Redirect to the AI-generated search results
+          window.location.href = data.redirect;
+        } else {
+          alert('Error: ' + (data.message || 'Could not process your preferences'));
+        }
+      } catch (error) {
+        console.error('AI Guide Error:', error);
+        alert('Error: Could not process your preferences');
+      } finally {
+        aiGuideBtn.disabled = false;
+        aiGuideBtn.innerHTML = originalHTML;
       }
-      
-      window.location.href = `/listings/search?${params.toString()}`;
-    });
+    }
+
+    // AI Search Button Click
+    if (aiGuideBtn) {
+      aiGuideBtn.addEventListener('click', async function(event) {
+        event.preventDefault();
+        await performAISearch();
+      });
+    }
+
+    // Enter key in search input triggers AI search
+    if (searchInput) {
+      searchInput.addEventListener('keypress', async function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          await performAISearch();
+        }
+      });
+    }
+
+    // Prevent form submission (all searches go through AI)
+    if (searchForm) {
+      searchForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        performAISearch();
+      });
+    }
 
     // Restore search query from URL if it exists
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('query');
-    if (searchQuery) {
+    if (searchQuery && searchInput) {
       searchInput.value = decodeURIComponent(searchQuery);
-      searchInput.focus();
     }
   });
 </script>

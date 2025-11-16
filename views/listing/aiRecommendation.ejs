@@ -1,0 +1,230 @@
+<%- layout('layouts/boilerplate') %>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="text-white mb-0">
+                        <i class="fas fa-sparkles"></i> AI Travel Recommendation
+                    </h2>
+                </div>
+                
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        Describe your ideal travel experience and let our AI recommend the perfect listing for you!
+                    </p>
+
+                    <form id="aiForm">
+                        <div class="form-group mb-4">
+                            <label for="userPreferences" class="form-label fw-bold">
+                                <i class="fas fa-compass"></i> Your Travel Preferences
+                            </label>
+                            <textarea
+                                class="form-control form-control-lg"
+                                id="userPreferences"
+                                name="userPreferences"
+                                rows="5"
+                                placeholder="Example: I'm looking for a peaceful beach destination with a private villa, good for relaxation and water sports. Budget-friendly, with local restaurants nearby and stunning sunset views..."
+                                required
+                            ></textarea>
+                            <small class="text-muted d-block mt-2">
+                                Be specific! Mention location preferences, activities, budget, amenities, and vibe you're looking for.
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-lg btn-primary w-100" id="submitBtn">
+                            <i class="fas fa-magic"></i> Get AI Recommendations
+                        </button>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="mt-4" style="display: none;">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted">
+                                <i class="fas fa-brain"></i> AI is analyzing your preferences...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Results State -->
+                    <div id="resultsState" class="mt-5" style="display: none;">
+                        <div class="alert alert-info d-flex align-items-start">
+                            <i class="fas fa-lightbulb me-3 mt-1" style="font-size: 1.2rem;"></i>
+                            <div>
+                                <h5 class="alert-heading">AI Recommendations Based on Your Preferences</h5>
+                                <hr>
+                                <div id="recommendationsContent" class="recommendation-text"></div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> New Search
+                        </button>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="errorState" class="mt-4" style="display: none;">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="errorMessage"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle text-info"></i> How It Works
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <strong>✨ AI Analysis:</strong> Our AI reads your preferences and analyzes all available listings
+                        </li>
+                        <li class="mb-2">
+                            <strong>🎯 Smart Matching:</strong> It matches your needs with the perfect destinations
+                        </li>
+                        <li>
+                            <strong>💡 Personalized Recommendations:</strong> Get customized suggestions with explanations
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card {
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-control-lg {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control-lg:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .recommendation-text {
+        white-space: pre-wrap;
+        line-height: 1.8;
+        color: #333;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border-color: #b3d9ff;
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        textarea.form-control-lg {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<script>
+    document.getElementById("aiForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const userPreferences = document.getElementById("userPreferences").value;
+        const submitBtn = document.getElementById("submitBtn");
+
+        if (!userPreferences.trim()) {
+            showError("Please describe your travel preferences");
+            return;
+        }
+
+        // Show loading state
+        document.getElementById("resultsState").style.display = "none";
+        document.getElementById("errorState").style.display = "none";
+        document.getElementById("loadingState").style.display = "block";
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch("/ai-recommendations", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userPreferences }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to process your preferences");
+            }
+
+            // Redirect to search results with AI-generated query
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        } catch (error) {
+            showError(error.message || "An error occurred");
+            document.getElementById("loadingState").style.display = "none";
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    function showError(message) {
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorState").style.display = "block";
+    }
+
+    function resetForm() {
+        document.getElementById("aiForm").reset();
+        document.getElementById("resultsState").style.display = "none";
+        document.getElementById("errorState").style.display = "none";
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("userPreferences").focus();
+    }
+</script>

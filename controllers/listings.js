@@ -6,7 +6,7 @@ const options = {
     provider: 'openstreetmap',
     httpAdapter: 'https',
     headers: {
-        'User-Agent': 'Wanderlust-App/1.0 (support@wanderlust.com)'
+        'User-Agent': 'Wanderlust-App/1.0 (your-email@example.com)' // It's good practice to use a real contact email here.
     }
 };
 
@@ -49,60 +49,17 @@ module.exports.showListing = async (req, res) => {
 };
 
 module.exports.createListing = async (req, res, next) => {
-    try {
-        const fullAddress = `${req.body.listing.location}, ${req.body.listing.country}`;
-        
-        // Add retry logic for geocoding
-        let geocodingResponse;
-        let retries = 3;
-        while (retries > 0) {
-            try {
-                geocodingResponse = await geocoder.geocode(fullAddress);
-                break;
-            } catch (error) {
-                retries--;
-                if (retries === 0) {
-                    throw new Error('Geocoding service is not responding. Please try again later.');
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-            }
-        }
+    const fullAddress = `${req.body.listing.location}, ${req.body.listing.country}`;
+    const geocodingResponse = await geocoder.geocode(fullAddress);
 
-        // Validate geocoding response
-        if (!Array.isArray(geocodingResponse) || geocodingResponse.length === 0) {
-            req.flash("error", "Could not find coordinates for that location. Please verify the address and try again.");
-            return res.redirect("/listings/new");
-        }
-
-        if (!geocodingResponse[0].latitude || !geocodingResponse[0].longitude) {
-            req.flash("error", "Invalid location coordinates received. Please try a different address.");
-            return res.redirect("/listings/new");
-        }
-
-        // Create the new listing. Mongoose will apply the default image here.
-        const newListing = new Listing(req.body.listing);
-        
-        newListing.geometry = {
-            type: "Point",
-            coordinates: [geocodingResponse[0].longitude, geocodingResponse[0].latitude]
-        };
-        
-        newListing.owner = req.user._id;
-
-        if (req.file) {
-            let url = req.file.path;
-            let filename = req.file.filename;
-            newListing.image = { url, filename };
-        }
-
-        await newListing.save();
-        req.flash("success", "New listing created successfully!!!");
-        res.redirect("/listings");
-    } catch (error) {
-        console.error('Error creating listing:', error);
-        req.flash("error", error.message || "Failed to create listing. Please try again.");
-        res.redirect("/listings/new");
+    // Robust check to make sure we got valid coordinates
+    if (!Array.isArray(geocodingResponse) || geocodingResponse.length === 0) {
+        req.flash("error", "Could not find coordinates for that location. Please try a different address.");
+        return res.redirect("/listings/new");
     }
+
+    // Create the new listing. Mongoose will apply the default image here.
+    const newListing = new Listing(req.body.listing);
     
     newListing.geometry = {
         type: "Point",
@@ -139,111 +96,125 @@ module.exports.renderEditForm = async (req, res) => {
 };
 
 module.exports.updateListing = async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        // Make sure category is lowercase for consistency
-        if (req.body.listing.category) {
-            req.body.listing.category = req.body.listing.category.toLowerCase();
-        }
+    const { id } = req.params;
+    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
 
-        let listing = await Listing.findByIdAndUpdate(id, 
-            { ...req.body.listing },
-            { new: true, runValidators: true }
-        );
-
-        // Update coordinates if location or country changed
-        if (req.body.listing.location || req.body.listing.country) {
-            const fullAddress = `${listing.location}, ${listing.country}`;
-            try {
-                const geocodingResponse = await geocoder.geocode(fullAddress);
-                if (Array.isArray(geocodingResponse) && geocodingResponse.length > 0) {
-                    listing.geometry = {
-                        type: "Point",
-                        coordinates: [geocodingResponse[0].longitude, geocodingResponse[0].latitude]
-                    };
-                }
-            } catch (error) {
-                console.error('Geocoding error:', error);
-                // Don't block the update if geocoding fails
-            }
-        }
-
-        // This check correctly handles updating the image only if a new one is provided.
-        if (typeof req.file !== "undefined") {
-            let url = req.file.path;
-            let filename = req.file.filename;
-            listing.image = { url, filename };
-        }
-
+    // This check correctly handles updating the image only if a new one is provided.
+    if (typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        listing.image = { url, filename };
         await listing.save();
-        req.flash("success", "Listing updated successfully!");
-        res.redirect(`/listings/${id}`);
-    } catch (error) {
-        console.error('Update error:', error);
-        req.flash("error", "Error updating listing. Please try again.");
-        res.redirect(`/listings/${id}/edit`);
     }
+
+    req.flash("success", "Listing updated successfully!");
+    res.redirect(`/listings/${id}`);
 };
 
-// Enhanced search function with better error handling and category support
+// This search function intelligently filters listings
 module.exports.searchListings = async (req, res) => {
-    try {
-        console.log('Search request:', req.query);
-        const { query, category } = req.query;
-        let searchQuery = {};
-
-        // If no search criteria, show all listings
-        if (!query && !category) {
-            console.log('No search criteria, showing all listings');
-            const allListings = await Listing.find({});
-            return res.render("listing/index", { allListings });
+    const { query, category, countries, fallbackQueries } = req.query; // Get search params
+    
+    let filter = {
+        $or: [
+            { title: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } },
+            { location: { $regex: query, $options: "i" } },
+            { country: { $regex: query, $options: "i" } },
+        ],
+    };
+    
+    // If countries are specified (from AI), filter by those countries
+    if (countries) {
+        const countryList = countries.split(',').map(c => c.trim()).filter(c => c);
+        
+        if (countryList.length > 0) {
+            // Create regex patterns for each country (case-insensitive)
+            const countryRegexes = countryList.map(country => new RegExp(country, 'i'));
+            
+            filter = {
+                $and: [
+                    {
+                        country: {
+                            $in: countryRegexes
+                        }
+                    },
+                    filter
+                ]
+            };
         }
-
-        // Build search query
-        if (query && query.trim()) {
-            searchQuery.$or = [
-                { title: { $regex: new RegExp(query.trim(), 'i') } },
-                { description: { $regex: new RegExp(query.trim(), 'i') } },
-                { location: { $regex: new RegExp(query.trim(), 'i') } },
-                { country: { $regex: new RegExp(query.trim(), 'i') } }
-            ];
-        }
-
-        if (category) {
-            if (query) {
-                // If we have both query and category, we need to ensure both conditions are met
-                searchQuery = {
-                    $and: [
-                        { category: category.toLowerCase() },
-                        { $or: searchQuery.$or }
-                    ]
-                };
-            } else {
-                // If we only have category, just filter by that
-                searchQuery.category = category.toLowerCase();
+    }
+    
+    // If a category is specified, add it to the filter
+    if (category) {
+        filter = {
+            $and: [
+                { category: category.toLowerCase() },
+                filter
+            ]
+        };
+    }
+    
+    let allListings = await Listing.find(filter);
+    
+    // If no results found, try fallback queries (AI-suggested alternatives)
+    if (allListings.length === 0 && fallbackQueries) {
+        const fallbackList = fallbackQueries.split(',').map(q => q.trim()).filter(q => q);
+        
+        console.log(`No listings found for "${query}". Trying fallback queries:`, fallbackList);
+        
+        // Try each fallback query
+        for (const fallbackQuery of fallbackList) {
+            const fallbackFilter = {
+                $or: [
+                    { title: { $regex: fallbackQuery, $options: "i" } },
+                    { description: { $regex: fallbackQuery, $options: "i" } },
+                    { location: { $regex: fallbackQuery, $options: "i" } },
+                    { country: { $regex: fallbackQuery, $options: "i" } },
+                ],
+            };
+            
+            // If countries specified, filter by them too
+            if (countries) {
+                const countryList = countries.split(',').map(c => c.trim()).filter(c => c);
+                if (countryList.length > 0) {
+                    const countryRegexes = countryList.map(country => new RegExp(country, 'i'));
+                    fallbackFilter.$and = [
+                        { country: { $in: countryRegexes } },
+                        { $or: fallbackFilter.$or }
+                    ];
+                    delete fallbackFilter.$or;
+                }
+            }
+            
+            allListings = await Listing.find(fallbackFilter);
+            
+            if (allListings.length > 0) {
+                console.log(`Found ${allListings.length} listings using fallback query: "${fallbackQuery}"`);
+                break;
             }
         }
-
-        console.log('Final search query:', JSON.stringify(searchQuery, null, 2));
-        const allListings = await Listing.find(searchQuery);
-        
-        console.log(`Found ${allListings.length} listings`);
-        if (allListings.length === 0) {
-            req.flash("error", "No listings found matching your search criteria.");
-            return res.redirect('/listings');
-        }
-
-        return res.render("listing/index", { 
-            allListings,
-            searchQuery: query,
-            activeCategory: category
-        });
-    } catch (error) {
-        console.error('Search error:', error);
-        req.flash("error", "An error occurred while searching. Please try again.");
-        return res.redirect('/listings');
     }
+    
+    // If still no results, show all listings in the specified countries or featured listings
+    if (allListings.length === 0) {
+        console.log(`No results found. Showing featured listings.`);
+        
+        if (countries) {
+            const countryList = countries.split(',').map(c => c.trim()).filter(c => c);
+            if (countryList.length > 0) {
+                const countryRegexes = countryList.map(country => new RegExp(country, 'i'));
+                allListings = await Listing.find({ country: { $in: countryRegexes } });
+            }
+        }
+        
+        // If still nothing, show trending listings
+        if (allListings.length === 0) {
+            allListings = await Listing.find({ category: 'trending' }).limit(12);
+        }
+    }
+    
+    res.render("listing/index", { allListings });
 };
 
 module.exports.destroyListing = async (req, res) => {
