@@ -199,16 +199,49 @@
 
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to process your preferences");
+            // Handle both successful and fallback responses
+            if (data.success || data.isFallback || data.fallback) {
+                // Show message and redirect
+                if (data.message) {
+                    showInfo(data.message, data.isFallback || data.fallback);
+                }
+                
+                // Redirect after a short delay if successful
+                if (data.redirect) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1500);
+                }
+                return;
             }
 
-            // Redirect to search results with AI-generated query
-            if (data.redirect) {
-                window.location.href = data.redirect;
+            // Handle errors
+            if (!response.ok) {
+                const errorMsg =
+                    data.message ||
+                    data.error ||
+                    "Failed to process your preferences";
+
+                // Check if fallback recommendations are available
+                if (data.fallback && data.redirect) {
+                    // Use fallback recommendations
+                    showFallbackInfo(errorMsg);
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    // Show error and don't redirect
+                    showError(errorMsg);
+                }
+            } else {
+                showError(data.message || "An unexpected error occurred");
             }
         } catch (error) {
-            showError(error.message || "An error occurred");
+            console.error("Request error:", error);
+            showError(
+                error.message ||
+                    "Connection error. Please check your internet and try again."
+            );
             document.getElementById("loadingState").style.display = "none";
         } finally {
             submitBtn.disabled = false;
@@ -216,8 +249,41 @@
     });
 
     function showError(message) {
-        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("errorMessage").innerHTML = `
+            <strong>⚠️ Error:</strong> ${escapeHtml(message)}
+            <br>
+            <small class="d-block mt-2">Please try again or use a more specific description.</small>
+        `;
         document.getElementById("errorState").style.display = "block";
+    }
+
+    function showInfo(message, isFallback = false) {
+        document.getElementById("loadingState").style.display = "none";
+        const alertClass = isFallback ? "alert-warning" : "alert-success";
+        const icon = isFallback ? "⚙️" : "✅";
+        
+        document.getElementById("recommendationsContent").innerHTML = `
+            <div class="alert ${alertClass} mb-0">
+                ${icon} ${escapeHtml(message)}
+                <br>
+                <small class="d-block mt-2">Redirecting to results...</small>
+            </div>
+        `;
+        document.getElementById("resultsState").style.display = "block";
+    }
+
+    function showFallbackInfo(message) {
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("recommendationsContent").innerHTML = `
+            <div class="alert alert-info mb-0">
+                <strong>💡 Using Curated Recommendations</strong>
+                <br>${escapeHtml(message)}
+                <br>
+                <small class="d-block mt-2">We found great options based on your interests!</small>
+            </div>
+        `;
+        document.getElementById("resultsState").style.display = "block";
     }
 
     function resetForm() {
@@ -226,5 +292,11 @@
         document.getElementById("errorState").style.display = "none";
         document.getElementById("loadingState").style.display = "none";
         document.getElementById("userPreferences").focus();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
     }
 </script>
